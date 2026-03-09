@@ -41,65 +41,55 @@
         h1 { font-family: 'DM Serif Display', serif; font-size: 42px; margin: 0 0 5px 0; }
         .subtitle { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 35px; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* ÁREA DO CEP COM RÓTULO */
-        .cep-container {
+        /* CONTAINER DE ENTRADA UNIFICADO */
+        .input-group {
             display: flex;
             align-items: center;
             background: var(--white);
             border: 2px solid var(--accent);
             border-radius: 12px;
-            padding: 10px 20px;
-            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        .cep-label {
+
+        /* BOTÃO CEP (O Rótulo que virou botão) */
+        .btn-trigger-cep {
+            background: var(--accent);
+            color: white;
             font-family: 'DM Mono', monospace;
             font-weight: bold;
             font-size: 14px;
-            margin-right: 15px;
-            color: var(--muted);
-            border-right: 1px solid #ddd;
-            padding-right: 15px;
+            padding: 15px 20px;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
         }
+        .btn-trigger-cep:hover { background: #2a4a6c; }
+
         #cep-input { 
             border: none; 
             outline: none; 
             font-family: 'DM Mono', monospace; 
-            font-size: 22px; 
+            font-size: 20px; 
             width: 100%; 
             color: var(--accent);
+            padding: 10px 15px;
             background: transparent;
         }
 
-        /* BOTÕES */
-        .btn-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-        }
-
-        .main-btn { 
-            width: 100%; 
-            padding: 16px; 
-            border-radius: 12px; 
-            font-family: 'Syne', sans-serif;
-            font-weight: 700; 
-            cursor: pointer; 
-            font-size: 15px; 
-            transition: 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
+        /* BOTÃO GEO */
+        .btn-trigger-geo {
+            background: none;
             border: none;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-left: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            transition: 0.2s;
         }
-
-        .btn-primary { background: var(--accent); color: var(--white); }
-        .btn-primary:hover { background: #2a4a6c; }
-
-        .btn-geo { background: var(--white); color: var(--accent); border: 2px solid var(--accent); }
-        .btn-geo:hover { background: #f0f7ff; }
-        .btn-geo svg { fill: var(--accent); width: 18px; height: 18px; }
+        .btn-trigger-geo:hover { background: #f0f7ff; }
+        .btn-trigger-geo svg { fill: var(--accent); width: 22px; height: 22px; }
 
         .footer-note { margin-top: 30px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); }
     </style>
@@ -110,19 +100,13 @@
     <h1>Zelador Cívico</h1>
     <div class="subtitle">Auditoria de Dados Urbanos</div>
 
-    <div class="cep-container">
-        <span class="cep-label">CEP</span>
-        <input type="text" id="cep-input" placeholder="00000-000" maxlength="9" inputmode="numeric">
-    </div>
-
-    <div class="btn-stack">
-        <button class="btn-primary main-btn" onclick="acessar()">
-            Entrar no Ecossistema →
-        </button>
+    <div class="input-group">
+        <button class="btn-trigger-cep" onclick="acessar()">CEP</button>
         
-        <button class="btn-geo main-btn" onclick="usarGeo()">
+        <input type="text" id="cep-input" placeholder="00000-000" maxlength="9" inputmode="numeric">
+        
+        <button class="btn-trigger-geo" onclick="usarGeo()" title="Usar Geolocalização">
             <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-12-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Usar Geolocalização
         </button>
     </div>
 
@@ -140,6 +124,7 @@
     function acessar() {
         const cepRaw = document.getElementById('cep-input').value.replace(/\D/g,'');
         if(cepRaw.length === 8) {
+            // Enviando o dado para o zelador.html
             window.location.href = `zelador.html?cep=${cepRaw}`;
         } else {
             alert("Por favor, digite o CEP completo.");
@@ -152,14 +137,14 @@
                 (pos) => {
                     window.location.href = `zelador.html?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`;
                 },
-                () => alert("Não foi possível obter sua localização. Use o CEP.")
+                () => alert("Erro ao obter localização. Use o CEP.")
             );
         } else {
-            alert("Geolocalização não suportada neste navegador.");
+            alert("Geolocalização não suportada.");
         }
     }
 
-    // ENTER PARA ACESSAR
+    // ENTER TAMBÉM ACIONA
     document.getElementById('cep-input').addEventListener('keypress', e => {
         if (e.key === 'Enter') acessar();
     });
