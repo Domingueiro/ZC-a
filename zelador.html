@@ -154,14 +154,130 @@ body{font-family:'Barlow',sans-serif;background:#0d0f14;}
 </div>
 
 <script>
-var telaAtual=0;
-var navBtns=document.querySelectorAll('.nav-btn');
+var telaAtual = 0;
+var navBtns = document.querySelectorAll('.nav-btn');
+var zcMapa = null;
+var zcMarcador = null;
 
-function irParaTela(idx){
-  telaAtual=idx;
-  document.getElementById('screens-wrap').style.transform='translateX(-'+(idx*100)+'vw)';
-  navBtns.forEach(function(b,i){b.classList.toggle('active',i===idx);});
+function irParaTela(idx) {
+    telaAtual = idx;
+    document.getElementById('screens-wrap').style.transform = 'translateX(-' + (idx * 100) + 'vw)';
+    navBtns.forEach(function(b, i) { b.classList.toggle('active', i === idx); });
 }
+
+// INICIALIZAÇÃO E CAPTURA DE URL
+window.onload = function() {
+    zcIniciarMapa();
+    const params = new URLSearchParams(window.location.search);
+    const cepParam = params.get('cep');
+
+    if (cepParam) {
+        // Preenche o campo visualmente e limpa formatação
+        const input = document.getElementById('zc-cep-input');
+        input.value = cepParam.replace(/\D/g, '').slice(0, 5) + '-' + cepParam.replace(/\D/g, '').slice(5, 8);
+        // Dispara a análise automática
+        zcIniciarAnalise();
+    }
+};
+
+// BANCO DE DADOS SIMULADO (REGIONAL)
+var REGIOES = {
+    norte: {
+        bairro: 'Casa Verde / Limão / Santana', subprefeitura: 'Casa Verde',
+        total_obras: 18, investimento_total: 'R$ 21 mi', retorno_percentual: 11,
+        disparidade_label: '1,2x abaixo da média', 
+        analise: ['A Zona Norte apresenta déficit histórico de investimentos em infraestrutura viária e saneamento.', 'Os principais projetos concentram-se na melhoria do sistema de drenagem e manutenção de vias arteriais.'],
+        alertas: [{tipo:'aviso', titulo:'Déficit de Manutenção', descricao:'Índice de vias em más condições 34% acima da média.'}]
+    },
+    geral: {
+        bairro: 'Região de São Paulo', subprefeitura: 'Consultar local',
+        total_obras: 14, investimento_total: 'R$ 16 mi', retorno_percentual: 10,
+        disparidade_label: 'Na média municipal',
+        analise: ['Perfil compatível com a média das subprefeituras periféricas.'],
+        alertas: [{tipo:'aviso', titulo:'Atenção', descricao:'Verifique os canais oficiais do TCM.'}]
+    }
+};
+
+function zcDetectarRegiao(raw) {
+    if (raw.startsWith('02') || raw.startsWith('03') || raw.startsWith('07')) return REGIOES.norte;
+    return REGIOES.geral;
+}
+
+function zcIniciarMapa() {
+    if (zcMapa) return;
+    zcMapa = L.map('zc-map').setView([-23.5505, -46.6333], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(zcMapa);
+}
+
+function zcMoverMapa(lat, lon, label) {
+    if (!zcMapa) zcIniciarMapa();
+    zcMapa.setView([lat, lon], 15);
+    if (zcMarcador) zcMapa.removeLayer(zcMarcador);
+    zcMarcador = L.marker([lat, lon]).addTo(zcMapa).bindPopup('<b>' + label + '</b>').openPopup();
+}
+
+async function zcIniciarAnalise() {
+    var raw = document.getElementById('zc-cep-input').value.replace(/\D/g, '');
+    if (raw.length !== 8) { zcSetErro('CEP Inválido'); return; }
+    
+    zcClearErro();
+    zcSetStatus('📍 Localizando endereço...');
+    
+    try {
+        const response = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
+        const data = await response.json();
+        
+        if (data.erro) {
+            zcSetErro('CEP não encontrado.');
+            zcHideStatus();
+            return;
+        }
+
+        zcSetStatus('🗺 Posicionando no mapa...');
+        // Busca coordenadas reais via Nominatim (OSM)
+        const geoResp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.logradouro + ", " + data.bairro + ", São Paulo, SP")}`);
+        const geoData = await geoResp.json();
+        
+        if (geoData && geoData[0]) {
+            zcMoverMapa(parseFloat(geoData[0].lat), parseFloat(geoData[0].lon), data.bairro);
+        }
+
+        zcSetStatus('📊 Gerando análise...');
+        setTimeout(() => {
+            zcRenderResultados(raw, data, zcDetectarRegiao(raw));
+        }, 500);
+
+    } catch (error) {
+        zcSetErro('Erro de conexão ou busca.');
+        zcHideStatus();
+    }
+}
+
+function zcRenderResultados(cep, end, d) {
+    zcHideStatus();
+    document.getElementById('zc-resultados').style.display = 'block';
+    document.getElementById('zc-r-bairro').textContent = end.bairro || d.bairro;
+    document.getElementById('zc-r-cep').textContent = 'CEP ' + cep.slice(0,5)+'-'+cep.slice(5) + (end.logradouro ? ' · ' + end.logradouro : '');
+    document.getElementById('zc-r-sub').textContent = 'Subprefeitura ' + d.subprefeitura;
+    document.getElementById('zc-r-obras').textContent = d.total_obras;
+    document.getElementById('zc-r-invest').textContent = d.investimento_total;
+    document.getElementById('zc-r-retorno').textContent = d.retorno_percentual + '%';
+    document.getElementById('zc-r-disp').textContent = d.disparidade_label;
+    
+    let txt = "";
+    d.analise.forEach(p => txt += `<p>${p}</p>`);
+    document.getElementById('zc-r-analise').innerHTML = txt;
+}
+
+function zcSetStatus(msg) { document.getElementById('zc-status').style.display='flex'; document.getElementById('zc-status-texto').textContent=msg; }
+function zcHideStatus() { document.getElementById('zc-status').style.display='none'; }
+function zcSetErro(msg) { 
+    const err = document.getElementById('zc-erro');
+    err.style.display='block'; 
+    err.textContent=msg; 
+}
+function zcClearErro() { document.getElementById('zc-erro').style.display='none'; }
+</script>
 
 // LÓGICA DE INTEGRAÇÃO COM O PORTAL (NOVO)
 window.onload = function() {
