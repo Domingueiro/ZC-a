@@ -1,379 +1,169 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zelador Cívico · São Paulo</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;}
-body{font-family:'Barlow',sans-serif;background:#0d0f14;}
-#topbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:#003f6b;display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;box-shadow:0 2px 12px rgba(0,0,0,.4);}
-.topbar-logo{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.1em;color:#FFD700;white-space:nowrap;flex-shrink:0;}
-.topbar-logo span{color:rgba(255,255,255,.6);font-size:.7rem;font-family:'Barlow Condensed',sans-serif;vertical-align:middle;margin-left:6px;}
-.nav-menu{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;}
-.nav-menu::-webkit-scrollbar{display:none;}
-.nav-btn{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-radius:4px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.65);background:none;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.nav-btn:hover{color:#FFD700;border-color:rgba(255,215,0,.4);}
-.nav-btn.active{background:#FFD700;color:#003f6b;border-color:#FFD700;}
-#screens-wrap{position:fixed;top:52px;left:0;right:0;bottom:0;display:flex;transition:transform .4s cubic-bezier(.4,0,.2,1);}
-.screen{min-width:100vw;width:100vw;height:100%;overflow:hidden;}
-#screen-zelador{background:#f0f2f5;overflow-y:auto;}
-#screen-orcamento iframe,#screen-alertas iframe{width:100%;height:100%;border:none;}
-.zc-card{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin:12px;padding:16px;}
-.zc-card-title{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#003f6b;margin-bottom:12px;}
-.zc-busca-row{display:flex;gap:8px;}
-.zc-busca-row input{flex:1;padding:12px 14px;border:2px solid #dde1e7;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;letter-spacing:.12em;color:#1a1e27;outline:none;transition:border-color .2s;}
-.zc-busca-row input:focus{border-color:#005fa3;}
-.zc-busca-row input::placeholder{color:#aaa;}
-.zc-btn-analisar{padding:12px 20px;background:#2e7d32;color:white;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s;}
-.zc-btn-analisar:hover{background:#1b5e20;}
-.zc-btn-analisar:disabled{background:#aaa;cursor:not-allowed;}
-#zc-map{height:200px;margin:0 12px 12px;border-radius:10px;border:2px solid #dde1e7;}
-#zc-status{display:none;margin:0 12px 12px;background:#003f6b;border-radius:8px;padding:12px 16px;color:white;font-size:.85rem;align-items:center;gap:10px;}
-.zc-spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#FFD700;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
-@keyframes spin{to{transform:rotate(360deg);}}
-#zc-erro{display:none;margin:0 12px 12px;background:#fff0f0;border:1.5px solid #d32f2f;border-radius:8px;padding:12px 16px;color:#d32f2f;font-size:.85rem;}
-#zc-resultados{display:none;}
-.zc-demo-badge{background:#fff8dc;border:1px solid #c8a400;border-radius:8px;margin:0 12px 12px;padding:10px 14px;font-size:.78rem;color:#5a4a00;text-align:center;}
-.zc-bairro-header{background:linear-gradient(135deg,#003f6b,#005fa3);border-radius:10px;margin:0 12px 12px;padding:16px;color:white;}
-.zc-bairro-nome{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.06em;color:#FFD700;line-height:1.1;}
-.zc-bairro-cep{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:.15em;color:rgba(255,255,255,.65);margin-top:2px;}
-.zc-bairro-sub{font-size:.8rem;color:rgba(255,255,255,.55);margin-top:4px;}
-.zc-metricas-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 12px 12px;}
-.zc-metrica{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.07);border-top:3px solid #003f6b;}
-.zc-metrica.alerta{border-top-color:#d32f2f;}
-.zc-metrica.positivo{border-top-color:#2e7d32;}
-.zc-metrica.aviso{border-top-color:#c8a400;}
-.zc-metrica-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:#888;font-weight:600;margin-bottom:6px;}
-.zc-metrica-valor{font-family:'Bebas Neue',sans-serif;font-size:1.45rem;color:#1a1e27;line-height:1;}
-.zc-metrica-sub{font-size:.72rem;color:#aaa;margin-top:3px;}
-.zc-ia-box{background:#f7f9ff;border:1.5px solid #c8d8f0;border-radius:10px;padding:14px;margin-bottom:12px;}
-.zc-ia-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-.zc-ia-badge{background:#003f6b;color:#FFD700;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;}
-.zc-ia-titulo{font-size:.82rem;font-weight:600;color:#003f6b;}
-.zc-ia-texto{font-size:.88rem;color:#333;line-height:1.7;}
-.zc-ia-texto p{margin-bottom:8px;}
-.zc-alerta-item{border-left:4px solid #d32f2f;background:#fff5f5;border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:10px;font-size:.85rem;}
-.zc-alerta-item.aviso{border-left-color:#c8a400;background:#fffdf0;}
-.zc-alerta-item b{display:block;margin-bottom:2px;font-size:.8rem;}
-.zc-obra-item{background:#f0f2f5;border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border:1px solid #dde1e7;}
-.zc-obra-nome{font-weight:600;font-size:.9rem;color:#1a1e27;}
-.zc-obra-detalhe{font-size:.78rem;color:#666;margin-top:3px;}
-.zc-obra-valor{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:#003f6b;white-space:nowrap;}
-.zc-pill{font-size:.65rem;font-weight:700;border-radius:20px;padding:2px 8px;text-transform:uppercase;display:inline-block;margin-top:4px;}
-.pill-verde{background:#e8f5e9;color:#2e7d32;}
-.pill-ouro{background:#fff8dc;color:#c8a400;}
-.pill-azul{background:#e3f0ff;color:#005fa3;}
-.pill-cinza{background:#eee;color:#666;}
-.zc-comp-barra-wrap{margin:10px 0;}
-.zc-comp-label{display:flex;justify-content:space-between;font-size:.78rem;color:#555;margin-bottom:4px;}
-.zc-comp-barra{height:12px;border-radius:6px;background:#dde1e7;overflow:hidden;}
-.zc-comp-fill{height:100%;border-radius:6px;transition:width 1.2s ease;}
-.fill-local{background:#2e7d32;}
-.fill-media{background:#c8a400;}
-.fill-centro{background:#005fa3;}
-.zc-comp-conclusao{font-size:.82rem;background:#fff8dc;border:1px solid #c8a400;border-radius:8px;padding:10px 12px;margin-top:12px;color:#5a4a00;line-height:1.6;}
-.zc-acoes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.zc-btn-acao{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 10px;border:none;border-radius:10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;text-transform:uppercase;color:white;text-decoration:none;text-align:center;transition:filter .2s;}
-.zc-btn-acao:hover{filter:brightness(1.1);}
-.zc-btn-acao .icone{font-size:1.4rem;}
-.btn-tcm{background:#d32f2f;}
-.btn-mp{background:#6a1f8a;}
-.btn-zap{background:#128C7E;}
-.btn-rel{background:#003f6b;}
-.zc-disclaimer{font-size:.68rem;color:#aaa;text-align:center;margin:20px 12px 10px;line-height:1.6;}
-.zc-disclaimer a{color:#888;}
-.zc-footer{background:#003f6b;color:rgba(255,255,255,.4);text-align:center;padding:14px;font-size:.7rem;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zelador Cívico · Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Syne:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #f5f2ec; 
+            --accent: #1a3a5c; 
+            --yellow: #f5c842; 
+            --muted: #8a8478; 
+            --white: #ffffff;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--accent); 
+            font-family: 'Syne', sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+        }
+
+        .portal-card { 
+            text-align: center; 
+            max-width: 400px; 
+            width: 100%;
+            padding: 40px; 
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(26, 58, 92, 0.05);
+        }
+
+        h1 { font-family: 'DM Serif Display', serif; font-size: 42px; margin: 0 0 5px 0; }
+        .subtitle { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 35px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* ÁREA DO CEP COM RÓTULO */
+        .cep-container {
+            display: flex;
+            align-items: center;
+            background: var(--white);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 10px 20px;
+            margin-bottom: 15px;
+        }
+        .cep-label {
+            font-family: 'DM Mono', monospace;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 15px;
+            color: var(--muted);
+            border-right: 1px solid #ddd;
+            padding-right: 15px;
+        }
+        #cep-input { 
+            border: none; 
+            outline: none; 
+            font-family: 'DM Mono', monospace; 
+            font-size: 22px; 
+            width: 100%; 
+            color: var(--accent);
+            background: transparent;
+        }
+
+        /* BOTÕES */
+        .btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .main-btn { 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 12px; 
+            font-family: 'Syne', sans-serif;
+            font-weight: 700; 
+            cursor: pointer; 
+            font-size: 15px; 
+            transition: 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            border: none;
+        }
+
+        .btn-primary { background: var(--accent); color: var(--white); }
+        .btn-primary:hover { background: #2a4a6c; }
+
+        .btn-geo { background: var(--white); color: var(--accent); border: 2px solid var(--accent); }
+        .btn-geo:hover { background: #f0f7ff; }
+        .btn-geo svg { fill: var(--accent); width: 18px; height: 18px; }
+
+        .footer-note { margin-top: 30px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); }
+    </style>
 </head>
 <body>
-<div id="topbar">
-  <div class="topbar-logo">&#9878; ZELADOR<span>CIVICO &middot; SP</span></div>
-  <div class="nav-menu">
-    <button class="nav-btn active" onclick="irParaTela(0)">&#127968; Zelador</button>
-    <button class="nav-btn" onclick="irParaTela(1)">&#128202; Orcamento</button>
-    <button class="nav-btn" onclick="irParaTela(2)">&#128680; Alertas</button>
-  </div>
-</div>
-<div id="screens-wrap">
-  <div class="screen" id="screen-zelador">
-    <div class="zc-card" style="margin-top:14px">
-      <div class="zc-card-title">&#128269; Consultar Territorio</div>
-      <div class="zc-busca-row">
-        <input type="text" id="zc-cep-input" placeholder="00000-000" maxlength="9" autocomplete="off"/>
-        <button class="zc-btn-analisar" id="zc-btn-analisar" onclick="zcIniciarAnalise()">Analisar</button>
-      </div>
-      <p style="font-size:.75rem;color:#999;margin-top:8px;">Ex: 02550-040 &middot; 08410-000 &middot; 01310-100</p>
+
+<div class="portal-card">
+    <h1>Zelador Cívico</h1>
+    <div class="subtitle">Auditoria de Dados Urbanos</div>
+
+    <div class="cep-container">
+        <span class="cep-label">CEP</span>
+        <input type="text" id="cep-input" placeholder="00000-000" maxlength="9" inputmode="numeric">
     </div>
-    <div id="zc-map"></div>
-    <div id="zc-status"><div class="zc-spin"></div><span id="zc-status-texto">Consultando...</span></div>
-    <div id="zc-erro"></div>
-    <div id="zc-resultados">
-      <div class="zc-demo-badge">&#128202; Dados demonstrativos baseados em padroes reais de investimento da PMSP</div>
-      <div class="zc-bairro-header">
-        <div class="zc-bairro-nome" id="zc-r-bairro">-</div>
-        <div class="zc-bairro-cep" id="zc-r-cep">CEP -</div>
-        <div class="zc-bairro-sub" id="zc-r-sub">Subprefeitura -</div>
-      </div>
-      <div class="zc-metricas-grid">
-        <div class="zc-metrica" id="zc-card-obras"><div class="zc-metrica-label">Obras</div><div class="zc-metrica-valor" id="zc-r-obras">-</div><div class="zc-metrica-sub">no territorio</div></div>
-        <div class="zc-metrica" id="zc-card-invest"><div class="zc-metrica-label">Investimento</div><div class="zc-metrica-valor" id="zc-r-invest">-</div><div class="zc-metrica-sub">previsto total</div></div>
-        <div class="zc-metrica" id="zc-card-retorno"><div class="zc-metrica-label">Retorno Local</div><div class="zc-metrica-valor" id="zc-r-retorno">-</div><div class="zc-metrica-sub">do arrecadado</div></div>
-        <div class="zc-metrica" id="zc-card-disp"><div class="zc-metrica-label">Disparidade</div><div class="zc-metrica-valor" id="zc-r-disp">-</div><div class="zc-metrica-sub">vs. media SP</div></div>
-      </div>
-      <div class="zc-card">
-        <div class="zc-card-title">Analise Territorial</div>
-        <div class="zc-ia-box"><div class="zc-ia-header"><span class="zc-ia-badge">ANALISE</span><span class="zc-ia-titulo">Perfil baseado em dados abertos da PMSP</span></div><div class="zc-ia-texto" id="zc-r-analise"></div></div>
-      </div>
-      <div class="zc-card"><div class="zc-card-title">Alertas de Irregularidade</div><div id="zc-r-alertas"></div></div>
-      <div class="zc-card"><div class="zc-card-title">Obras e Projetos</div><div id="zc-r-obras-lista"></div></div>
-      <div class="zc-card"><div class="zc-card-title">Comparativo Territorial</div><div id="zc-r-comparativo"></div></div>
-      <div class="zc-card">
-        <div class="zc-card-title">Acao Civica</div>
-        <div class="zc-acoes-grid">
-          <a class="zc-btn-acao btn-tcm" href="https://www.tcm.sp.gov.br/ouvidoria" target="_blank"><span class="icone">&#127963;</span>TCM-SP</a>
-          <a class="zc-btn-acao btn-mp" href="https://www.mpsp.mp.br/portal/page/portal/cao_cidadania/Atendimento_ao_publico" target="_blank"><span class="icone">&#9878;</span>MP-SP</a>
-          <button class="zc-btn-acao btn-zap" onclick="zcEnviarWhatsApp()"><span class="icone">&#128242;</span>WhatsApp</button>
-          <button class="zc-btn-acao btn-rel" onclick="zcGerarRelatorio()"><span class="icone">&#128196;</span>Relatorio</button>
-        </div>
-      </div>
-      <div class="zc-disclaimer">Dados demonstrativos &middot; <a href="https://obrasabertas.prefeitura.sp.gov.br" target="_blank">Obras Abertas PMSP</a></div>
+
+    <div class="btn-stack">
+        <button class="btn-primary main-btn" onclick="acessar()">
+            Entrar no Ecossistema →
+        </button>
+        
+        <button class="btn-geo main-btn" onclick="usarGeo()">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-12-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Usar Geolocalização
+        </button>
     </div>
-    <div class="zc-footer">ZELADOR CIVICO &middot; Auditoria Social e Transparencia Territorial &middot; Sao Paulo</div>
-  </div>
-  <div class="screen" id="screen-orcamento">
-    <iframe id="iframe-orcamento" src="orcamento.html" title="Execucao Orcamentaria SP"></iframe>
-  </div>
-  <div class="screen" id="screen-alertas">
-    <iframe id="iframe-alertas" src="alertas.html" title="Alertas por Localidade"></iframe>
-  </div>
+
+    <div class="footer-note">SÃO PAULO · BRASIL · PAZ PROFUNDA</div>
 </div>
+
 <script>
-var telaAtual=0;
-var navBtns=document.querySelectorAll('.nav-btn');
-function irParaTela(idx){
-  telaAtual=idx;
-  document.getElementById('screens-wrap').style.transform='translateX(-'+(idx*100)+'vw)';
-  navBtns.forEach(function(b,i){b.classList.toggle('active',i===idx);});
-  if(idx===2&&zcCepAtual){
-    var fr=document.getElementById('iframe-alertas');
-    if(fr&&fr.contentWindow) fr.contentWindow.postMessage({tipo:'cep',cep:zcCepAtual},'*');
-  }
-}
-var swX=0,swY=0;
-document.getElementById('screens-wrap').addEventListener('touchstart',function(e){swX=e.touches[0].clientX;swY=e.touches[0].clientY;},{passive:true});
-document.getElementById('screens-wrap').addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-swX,dy=e.changedTouches[0].clientY-swY;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50){if(dx<0&&telaAtual<2)irParaTela(telaAtual+1);if(dx>0&&telaAtual>0)irParaTela(telaAtual-1);}},{passive:true});
-var zcCepAtual='';
-var REGIOES = {
-  centro: {
-    bairro:'Centro / Centro Expandido', subprefeitura:'Sé / Pinheiros',
-    total_obras:34, investimento_total:'R$ 48 mi', retorno_percentual:18,
-    disparidade_label:'2,1x acima da média', nivel_alerta:'medio',
-    analise:['O Centro Expandido concentra os maiores volumes de investimento público de São Paulo, com forte presença de obras de recapeamento viário, requalificação de calçadas e projetos de mobilidade urbana. A Subprefeitura Sé lidera o número de contratos ativos no sistema SIURB.','Entre os projetos em andamento destacam-se intervenções na rede de drenagem pluvial e a requalificação de praças e áreas verdes, com recursos do Programa de Metas da Prefeitura.','Apesar do volume de recursos, auditores do TCM-SP identificaram irregularidades em licitações de zeladoria urbana na região central, com indícios de sobrepreço em contratos de varrição e poda de árvores.'],
-    alertas:[{tipo:'aviso',titulo:'Sobrepreço em Licitação',descricao:'Contrato de recapeamento viário com valor 28% acima da média regional detectado pelo TCM-SP.'},{tipo:'aviso',titulo:'Fuga de Recurso',descricao:'74% da arrecadação local é direcionada ao Tesouro Municipal antes do retorno territorial.'}],
-    obras:[{nome:'Recapeamento Av. Paulista e entorno',tipo:'Pavimentação',status:'Em andamento',valor:'R$ 8,2 mi',detalhe:'Av. Paulista, Bela Vista e Consolação'},{nome:'Requalificação Parque Trianon',tipo:'Urbanismo',status:'Concluída',valor:'R$ 3,1 mi',detalhe:'Restauro de equipamentos e paisagismo'},{nome:'UBS Vila Buarque — Reforma',tipo:'Saúde',status:'Em andamento',valor:'R$ 1,8 mi',detalhe:'Modernização e ampliação'},{nome:'Ciclovias Rede Centro',tipo:'Mobilidade',status:'Prevista',valor:'R$ 5,4 mi',detalhe:'Expansão da malha cicloviária central'},{nome:'EMEI Bela Vista — Ampliação',tipo:'Educação',status:'Contratada',valor:'R$ 2,3 mi',detalhe:'Novas salas e reforma estrutural'},{nome:'Drenagem Córrego Itororó',tipo:'Saneamento',status:'Em andamento',valor:'R$ 9,7 mi',detalhe:'Canalização e parque linear'}],
-    comparativo:{seu_cep_perc:72,media_sp_perc:50,melhor_bairro_perc:100,melhor_bairro:'Itaim Bibi',conclusao:'Esta região recebe investimento 44% acima da média municipal, mas ainda 28% abaixo dos bairros de maior arrecadação.'},
-    whatsapp_msg:'⚖ ZELADOR CÍVICO\n📍 Centro/Centro Expandido · SP\n💰 R$ 48 mi em obras · Retorno local: 18%\n🟡 Alerta: sobrepreço detectado em licitação de recapeamento'
-  },
-  oeste_alto: {
-    bairro:'Itaim Bibi / Moema / Vila Olímpia', subprefeitura:'Pinheiros',
-    total_obras:41, investimento_total:'R$ 67 mi', retorno_percentual:22,
-    disparidade_label:'2,8x acima da média', nivel_alerta:'medio',
-    analise:['Itaim Bibi e Moema figuram entre os bairros com maior arrecadação de IPTU e ISS em São Paulo. O volume de investimentos públicos reflete a pressão política e econômica da região, com projetos de mobilidade e urbanismo de grande porte.','A expansão da Linha 5-Lilás e as obras de requalificação da Av. Brigadeiro Faria Lima aportaram mais de R$ 30 mi na infraestrutura local nos últimos três anos.','Apesar dos altos investimentos, moradores relatam disparidade na manutenção de áreas menos valorizadas, e organizações civis questionam a transparência nos processos licitatórios de zeladoria.'],
-    alertas:[{tipo:'aviso',titulo:'Contrato de Zeladoria Suspeito',descricao:'MP-SP investiga superfaturamento em contrato de R$ 4,2 mi para poda e limpeza.'},{tipo:'critico',titulo:'Obra Paralisada',descricao:'Revitalização da Praça Pereira Coutinho paralisada há 8 meses sem justificativa pública.'}],
-    obras:[{nome:'Requalificação Av. Faria Lima',tipo:'Mobilidade',status:'Concluída',valor:'R$ 18 mi',detalhe:'Alargamento de calçadas e nova ciclovia'},{nome:'Parque Linear Pinheiros',tipo:'Urbanismo',status:'Em andamento',valor:'R$ 12 mi',detalhe:'Marginal Pinheiros — trecho sul'},{nome:'Hospital Municipal — Reforma',tipo:'Saúde',status:'Prevista',valor:'R$ 7,5 mi',detalhe:'Modernização do pronto-atendimento'},{nome:'CEI Vila Olímpia — Construção',tipo:'Educação',status:'Contratada',valor:'R$ 3,8 mi',detalhe:'Nova unidade com 200 vagas'},{nome:'Drenagem Av. Santo Amaro',tipo:'Saneamento',status:'Em andamento',valor:'R$ 6,2 mi',detalhe:'Eliminação de pontos de alagamento'},{nome:'Iluminação LED — Bairro todo',tipo:'Iluminação',status:'Concluída',valor:'R$ 4,1 mi',detalhe:'Substituição de 3.200 pontos de luz'}],
-    comparativo:{seu_cep_perc:100,media_sp_perc:50,melhor_bairro_perc:100,melhor_bairro:'Itaim Bibi',conclusao:'Esta é a região com maior volume de investimento per capita de São Paulo, recebendo 2,8x mais recursos que a média municipal.'},
-    whatsapp_msg:'⚖ ZELADOR CÍVICO\n📍 Itaim Bibi/Moema · SP\n💰 R$ 67 mi em obras · Retorno local: 22%\n🔴 Obra paralisada e contrato sob investigação do MP-SP'
-  },
-  norte: {
-    bairro:'Zona Norte', subprefeitura:'Santana-Tucuruvi / Casa Verde',
-    total_obras:18, investimento_total:'R$ 21 mi', retorno_percentual:11,
-    disparidade_label:'1,2x abaixo da média', nivel_alerta:'medio',
-    analise:['A Zona Norte de São Paulo apresenta déficit histórico de investimentos em infraestrutura viária e saneamento. Bairros como Tucuruvi, Santana e Casa Verde recebem volume de obras abaixo da proporção de sua população.','Os principais projetos concentram-se na melhoria do sistema de drenagem e manutenção de vias arteriais. O programa Tapa-Buraco teve atuação intensa na região em 2023.','A ausência de linhas de metrô em grande parte da Zona Norte agrava a dependência do transporte por ônibus, e os investimentos em mobilidade têm sido insuficientes.'],
-    alertas:[{tipo:'aviso',titulo:'Déficit de Manutenção Viária',descricao:'Índice de vias em más condições 34% acima da média municipal segundo SIURB 2023.'},{tipo:'critico',titulo:'UBS Sem Reforma Há 12 Anos',descricao:'Três unidades básicas de saúde aguardam reforma estrutural urgente sem previsão de licitação.'}],
-    obras:[{nome:'Recapeamento Av. Eng. Caetano Álvares',tipo:'Pavimentação',status:'Em andamento',valor:'R$ 4,8 mi',detalhe:'Trecho entre Santana e Casa Verde'},{nome:'EMEF Tucuruvi — Reforma',tipo:'Educação',status:'Contratada',valor:'R$ 2,1 mi',detalhe:'Cobertura, elétrica e sanitários'},{nome:'Drenagem Córrego Mandaqui',tipo:'Saneamento',status:'Prevista',valor:'R$ 5,3 mi',detalhe:'Eliminação de risco de enchente'},{nome:'UBS Jardim Brasil — Reforma',tipo:'Saúde',status:'Prevista',valor:'R$ 1,4 mi',detalhe:'Aguarda liberação orçamentária'},{nome:'Praça do Carmo — Revitalização',tipo:'Urbanismo',status:'Em andamento',valor:'R$ 0,9 mi',detalhe:'Equipamentos e iluminação'},{nome:'Corredor de Ônibus Av. Cruzeiro do Sul',tipo:'Mobilidade',status:'Prevista',valor:'R$ 6,8 mi',detalhe:'Projeto em consulta pública'}],
-    comparativo:{seu_cep_perc:42,media_sp_perc:50,melhor_bairro_perc:100,melhor_bairro:'Itaim Bibi',conclusao:'A Zona Norte recebe 16% menos investimento que a média municipal, apesar de concentrar 22% da população de SP.'},
-    whatsapp_msg:'⚖ ZELADOR CÍVICO\n📍 Zona Norte · São Paulo\n💰 R$ 21 mi em obras · Retorno local: 11%\n🔴 Déficit viário e UBS sem reforma há 12 anos'
-  },
-  leste_periferia: {
-    bairro:'Zona Leste — Periferia', subprefeitura:'Guaianases / São Mateus / Itaim Paulista',
-    total_obras:9, investimento_total:'R$ 8,4 mi', retorno_percentual:5,
-    disparidade_label:'3,2x abaixo da média', nivel_alerta:'alto',
-    analise:['O extremo leste de São Paulo concentra algumas das maiores vulnerabilidades sociais e urbanas da cidade. Bairros como Guaianases, Itaim Paulista e São Mateus apresentam os menores índices de investimento per capita.','O retorno local de apenas 5% da arrecadação revela uma profunda disparidade territorial. Enquanto a região contribui com tributos municipais, o retorno em obras é sistematicamente inferior.','Organizações comunitárias denunciam ao TCM-SP a baixa execução orçamentária e os atrasos crônicos em obras contratadas.'],
-    alertas:[{tipo:'critico',titulo:'Déficit de Dignidade Territorial',descricao:'Investimento 68% abaixo da meta de equilíbrio territorial definida pelo Plano Diretor.'},{tipo:'critico',titulo:'Manutenção de Semáforos Suspensa',descricao:'Contrato vencido há 4 meses sem renovação, gerando risco à segurança viária.'},{tipo:'aviso',titulo:'Obra Escolar Atrasada 18 Meses',descricao:'Construção de EMEI no Jardim Helena paralisada por disputa contratual.'}],
-    obras:[{nome:'Pavimentação Ruas Jd. Helena',tipo:'Pavimentação',status:'Em andamento',valor:'R$ 1,9 mi',detalhe:'47 ruas sem pavimentação no distrito'},{nome:'EMEI Jardim Helena — Construção',tipo:'Educação',status:'Contratada',valor:'R$ 2,8 mi',detalhe:'Paralisada — disputa contratual'},{nome:'UPA Guaianases — Equipamentos',tipo:'Saúde',status:'Prevista',valor:'R$ 1,1 mi',detalhe:'Aguarda empenho orçamentário'},{nome:'Drenagem Córrego Lajeado',tipo:'Saneamento',status:'Prevista',valor:'R$ 1,8 mi',detalhe:'Área de risco de enchente recorrente'},{nome:'Praça Itaim Paulista — Reforma',tipo:'Urbanismo',status:'Em andamento',valor:'R$ 0,5 mi',detalhe:'Equipamentos esportivos e iluminação'},{nome:'Terminal São Mateus — Manutenção',tipo:'Mobilidade',status:'Prevista',valor:'R$ 0,3 mi',detalhe:'Acessibilidade e conservação'}],
-    comparativo:{seu_cep_perc:15,media_sp_perc:50,melhor_bairro_perc:100,melhor_bairro:'Itaim Bibi',conclusao:'Esta região recebe apenas 15% do investimento per capita do bairro mais favorecido — uma disparidade de 6,7x.'},
-    whatsapp_msg:'⚖ ZELADOR CÍVICO\n📍 Zona Leste Periferia · SP\n💰 R$ 8,4 mi em obras · Retorno local: apenas 5%\n🔴 ALERTA CRÍTICO: déficit 68% abaixo da meta do Plano Diretor'
-  },
-  sul: {
-    bairro:'Zona Sul', subprefeitura:'Santo Amaro / Campo Limpo / Cidade Ademar',
-    total_obras:22, investimento_total:'R$ 29 mi', retorno_percentual:13,
-    disparidade_label:'Na média municipal', nivel_alerta:'medio',
-    analise:['A Zona Sul apresenta grande heterogeneidade: bairros nobres como Santo Amaro e Brooklin convivem com distritos vulneráveis como Cidade Ademar e Campo Limpo. Os investimentos concentram-se nos bairros de maior renda.','O programa de obras da SIURB inclui projetos de drenagem e habitação, especialmente nas áreas próximas às represas Billings e Guarapiranga.','A Linha 5-Lilás tem sido o maior investimento em mobilidade da Zona Sul, beneficiando principalmente os distritos próximos à av. Giovanni Gronchi.'],
-    alertas:[{tipo:'aviso',titulo:'Risco Ambiental — Área de Manancial',descricao:'Ocupações irregulares próximas à Represa Guarapiranga aguardam urbanização há mais de 5 anos.'},{tipo:'aviso',titulo:'Contrato de Limpeza Questionado',descricao:'TCM-SP apura irregularidades em contrato de R$ 3,1 mi para coleta seletiva na região.'}],
-    obras:[{nome:'Urbanização Paraisópolis — Fase 3',tipo:'Habitação',status:'Em andamento',valor:'R$ 8,4 mi',detalhe:'Infraestrutura e regularização fundiária'},{nome:'Recapeamento Estrada do Campo Limpo',tipo:'Pavimentação',status:'Em andamento',valor:'R$ 3,7 mi',detalhe:'Trecho de 4,2 km'},{nome:'CEU Campo Limpo — Reforma',tipo:'Educação',status:'Contratada',valor:'R$ 2,9 mi',detalhe:'Telhado, elétrica e acessibilidade'},{nome:'Drenagem Bacia Guarapiranga',tipo:'Saneamento',status:'Prevista',valor:'R$ 6,1 mi',detalhe:'Proteção de manancial e APP'},{nome:'UBS Cidade Ademar — Construção',tipo:'Saúde',status:'Prevista',valor:'R$ 3,2 mi',detalhe:'Nova unidade para 15.000 habitantes'},{nome:'Extensão Ciclovia Chucri Zaidan',tipo:'Mobilidade',status:'Em andamento',valor:'R$ 1,8 mi',detalhe:'Conexão com terminal Brooklin'}],
-    comparativo:{seu_cep_perc:48,media_sp_perc:50,melhor_bairro_perc:100,melhor_bairro:'Itaim Bibi',conclusao:'A Zona Sul investe próximo à média municipal, mas com forte concentração nos bairros de maior renda.'},
-    whatsapp_msg:'⚖ ZELADOR CÍVICO\n📍 Zona Sul · São Paulo\n💰 R$ 29 mi em obras · Retorno local: 13%\n🟡 Disparidade interna e contrato sob apuração do TCM-SP'
-  },
-  geral: {
-    bairro:'Região de São Paulo', subprefeitura:'Consultar Subprefeitura local',
-    total_obras:14, investimento_total:'R$ 16 mi', retorno_percentual:10,
-    disparidade_label:'Abaixo da média SP', nivel_alerta:'medio',
-    analise:['Esta região de São Paulo apresenta perfil de investimentos compatível com a média das subprefeituras periféricas, com predominância de obras de manutenção viária e pequenas intervenções em equipamentos públicos.','Os dados do Portal Obras Abertas indicam projetos em execução principalmente nas áreas de pavimentação e saneamento, com menor presença de grandes investimentos em saúde e educação.','A fiscalização cidadã é fundamental para garantir que os recursos previstos sejam efetivamente aplicados. Utilize os canais do TCM-SP e MP-SP para denunciar irregularidades.'],
-    alertas:[{tipo:'aviso',titulo:'Baixo Retorno Territorial',descricao:'Retorno de apenas 10% da arrecadação local em investimentos diretos no território.'}],
-    obras:[{nome:'Tapa-Buraco — Operação Contínua',tipo:'Pavimentação',status:'Em andamento',valor:'R$ 2,1 mi',detalhe:'Manutenção de vias locais'},{nome:'Reforma de Escola Municipal',tipo:'Educação',status:'Prevista',valor:'R$ 1,8 mi',detalhe:'Aguarda processo licitatório'},{nome:'Poda de Árvores — Contrato Anual',tipo:'Urbanismo',status:'Em andamento',valor:'R$ 0,7 mi',detalhe:'Zeladoria urbana regional'},{nome:'Drenagem de Fundos de Vale',tipo:'Saneamento',status:'Prevista',valor:'R$ 4,3 mi',detalhe:'Redução de risco de enchentes'},{nome:'UBS — Manutenção Predial',tipo:'Saúde',status:'Em andamento',valor:'R$ 0,9 mi',detalhe:'Pintura, hidráulica e elétrica'}],
-    comparativo:{seu_cep_perc:35,media_sp_perc:50,melhor_bairro_perc:100,melhor_bairro:'Itaim Bibi',conclusao:'Esta região recebe 30% menos investimento que a média municipal de São Paulo.'},
-    whatsapp_msg:'⚖ ZELADOR CÍVICO\n📍 São Paulo · SP\n💰 R$ 16 mi em obras · Retorno local: 10%\n🟡 Região abaixo da média de investimentos municipais'
-  }
-};
+    // MÁSCARA DE CEP
+    document.getElementById('cep-input').addEventListener('input', e => {
+        let v = e.target.value.replace(/\D/g,'');
+        if(v.length > 5) v = v.slice(0,5) + '-' + v.slice(5,8);
+        e.target.value = v;
+    });
 
-function zcDetectarRegiao(raw) {
-  if (raw.startsWith('08') || raw.startsWith('09')) return REGIOES.leste_periferia;
-  if (['0445','0446','0451','0455','0456','0457'].some(function(p){return raw.startsWith(p);})) return REGIOES.oeste_alto;
-  if (raw.startsWith('01')) return REGIOES.centro;
-  if (raw.startsWith('02') || raw.startsWith('03') || raw.startsWith('07')) return REGIOES.norte;
-  if (raw.startsWith('04') || raw.startsWith('05') || raw.startsWith('06')) return REGIOES.sul;
-  return REGIOES.geral;
-}
-
-var zcMapa = null;
-var zcMarcador = null;
-var zcDadosCache = null;
-var zcZapMsg = '';
-
-function zcIniciarMapa() {
-  if (zcMapa) return;
-  zcMapa = L.map('zc-map').setView([-23.5505, -46.6333], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'}).addTo(zcMapa);
-}
-
-function zcMoverMapa(lat, lon, label) {
-  zcMapa.setView([lat, lon], 15);
-  if (zcMarcador) zcMapa.removeLayer(zcMarcador);
-  zcMarcador = L.marker([lat, lon]).addTo(zcMapa).bindPopup('<b>'+label+'</b>').openPopup();
-}
-
-document.getElementById('zc-cep-input').addEventListener('input', function() {
-  var v = this.value.replace(/\D/g,'').slice(0,8);
-  if (v.length > 5) v = v.slice(0,5)+'-'+v.slice(5);
-  this.value = v;
-});
-document.getElementById('zc-cep-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') zcIniciarAnalise();
-});
-
-function zcSetStatus(msg) { var w=document.getElementById('zc-status'); w.style.display='flex'; document.getElementById('zc-status-texto').textContent=msg; }
-function zcHideStatus() { document.getElementById('zc-status').style.display='none'; }
-function zcSetErro(msg) { var e=document.getElementById('zc-erro'); e.style.display='block'; e.textContent='⚠ '+msg; }
-function zcClearErro() { document.getElementById('zc-erro').style.display='none'; }
-
-async function zcIniciarAnalise() {
-  zcIniciarMapa();
-  var raw = document.getElementById('zc-cep-input').value.replace(/\D/g,'');
-  if (raw.length !== 8) { zcSetErro('Informe um CEP válido com 8 dígitos.'); return; }
-  zcClearErro();
-  document.getElementById('zc-resultados').style.display = 'none';
-  document.getElementById('zc-btn-analisar').disabled = true;
-
-  zcSetStatus('📍 Localizando endereço...');
-  var end;
-  try {
-    var r = await fetch('https://viacep.com.br/ws/'+raw+'/json/');
-    var d = await r.json();
-    if (d.erro) throw new Error('CEP não encontrado.');
-    end = d;
-  } catch(e) {
-    zcHideStatus(); document.getElementById('zc-btn-analisar').disabled=false;
-    zcSetErro('CEP inválido ou não encontrado.'); return;
-  }
-
-  zcSetStatus('🗺 Posicionando no mapa...');
-  try {
-    var query = (end.logradouro||'')+', '+(end.bairro||'')+', '+end.localidade+', SP, Brasil';
-    var geo = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(query));
-    var gd = await geo.json();
-    if (gd && gd[0]) {
-      zcMoverMapa(parseFloat(gd[0].lat), parseFloat(gd[0].lon), (end.bairro||end.localidade)+' · CEP '+raw.slice(0,5)+'-'+raw.slice(5));
-    } else {
-      var q2 = (end.bairro||end.localidade)+', São Paulo, SP, Brasil';
-      var g2 = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q2));
-      var gd2 = await g2.json();
-      if (gd2 && gd2[0]) zcMoverMapa(parseFloat(gd2[0].lat), parseFloat(gd2[0].lon), (end.bairro||end.localidade)+' · CEP '+raw.slice(0,5)+'-'+raw.slice(5));
+    function acessar() {
+        const cepRaw = document.getElementById('cep-input').value.replace(/\D/g,'');
+        if(cepRaw.length === 8) {
+            window.location.href = `zelador.html?cep=${cepRaw}`;
+        } else {
+            alert("Por favor, digite o CEP completo.");
+        }
     }
-  } catch(e) {}
 
-  zcSetStatus('📊 Gerando análise territorial...');
-  await new Promise(function(r){setTimeout(r,600);});
+    function usarGeo() {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    window.location.href = `zelador.html?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`;
+                },
+                () => alert("Não foi possível obter sua localização. Use o CEP.")
+            );
+        } else {
+            alert("Geolocalização não suportada neste navegador.");
+        }
+    }
 
-  var cepFmt = raw.slice(0,5)+'-'+raw.slice(5);
-  var regiao = zcDetectarRegiao(raw);
-  var dados = Object.assign({}, regiao);
-  if (end.bairro) dados.bairro = end.bairro+' · '+regiao.bairro.split('/')[0].trim();
-
-  zcDadosCache = { cep: cepFmt, endereco: end, dados: dados };
-  zcCompartilharCep(cepFmt); // compartilha com a tela de alertas
-  zcRenderResultados(cepFmt, end, dados);
-}
-
-function zcRenderResultados(cep, end, d) {
-  zcHideStatus();
-  document.getElementById('zc-btn-analisar').disabled = false;
-
-  document.getElementById('zc-r-bairro').textContent = d.bairro;
-  document.getElementById('zc-r-cep').textContent = 'CEP '+cep+(end.logradouro?' · '+end.logradouro:'');
-  document.getElementById('zc-r-sub').textContent = 'Subprefeitura '+d.subprefeitura;
-  document.getElementById('zc-r-obras').textContent = d.total_obras;
-  document.getElementById('zc-r-invest').textContent = d.investimento_total;
-
-  var perc = d.retorno_percentual;
-  document.getElementById('zc-r-retorno').textContent = perc+'%';
-  document.getElementById('zc-card-retorno').className = 'zc-metrica '+(perc<8?'alerta':perc<15?'aviso':'positivo');
-  document.getElementById('zc-r-disp').textContent = d.disparidade_label;
-  document.getElementById('zc-card-disp').className = 'zc-metrica '+(d.nivel_alerta==='alto'?'alerta':d.nivel_alerta==='medio'?'aviso':'positivo');
-
-  document.getElementById('zc-r-analise').innerHTML = d.analise.map(function(p){return '<p>'+p+'</p>';}).join('');
-
-  document.getElementById('zc-r-alertas').innerHTML = d.alertas.map(function(a){
-    return '<div class="zc-alerta-item '+(a.tipo==='aviso'?'aviso':'')+'"><b>'+(a.tipo==='critico'?'🔴 ':'🟡 ')+a.titulo+'</b>'+a.descricao+'</div>';
-  }).join('');
-
-  document.getElementById('zc-r-obras-lista').innerHTML = d.obras.map(function(o){
-    var s=(o.status||'').toLowerCase();
-    var pc=s.includes('andamento')?'pill-verde':s.includes('prevista')?'pill-ouro':s.includes('conclu')?'pill-azul':'pill-cinza';
-    return '<div class="zc-obra-item"><div style="flex:1"><div class="zc-obra-nome">'+o.nome+'</div><div class="zc-obra-detalhe">'+o.tipo+' · '+o.detalhe+'</div><span class="zc-pill '+pc+'">'+o.status+'</span></div><div class="zc-obra-valor">'+o.valor+'</div></div>';
-  }).join('');
-
-  var comp = d.comparativo;
-  var barras = [{label:'Seu CEP',perc:comp.seu_cep_perc,cls:'fill-local'},{label:'Média SP',perc:comp.media_sp_perc,cls:'fill-media'},{label:comp.melhor_bairro,perc:comp.melhor_bairro_perc,cls:'fill-centro'}];
-  document.getElementById('zc-r-comparativo').innerHTML = barras.map(function(b){
-    return '<div class="zc-comp-barra-wrap"><div class="zc-comp-label"><span>'+b.label+'</span><span>'+b.perc+'%</span></div><div class="zc-comp-barra"><div class="zc-comp-fill '+b.cls+'" style="width:'+b.perc+'%"></div></div></div>';
-  }).join('')+'<div class="zc-comp-conclusao">📌 '+comp.conclusao+'</div>';
-
-  zcZapMsg = d.whatsapp_msg;
-  document.getElementById('zc-resultados').style.display = 'block';
-  document.getElementById('zc-resultados').scrollIntoView({behavior:'smooth'});
-}
-
-function zcEnviarWhatsApp() { window.open('https://wa.me/?text='+encodeURIComponent(zcZapMsg||'Zelador Cívico SP'),'_blank'); }
-function zcGerarRelatorio() {
-  if (!zcDadosCache) { alert('Faça uma consulta primeiro.'); return; }
-  var d=zcDadosCache.dados, e=zcDadosCache.endereco;
-  var txt='=== ZELADOR CÍVICO — RELATÓRIO TERRITORIAL ===\n\nCEP: '+zcDadosCache.cep+'\nBairro: '+d.bairro+'\nSubprefeitura: '+d.subprefeitura+'\nLogradouro: '+(e.logradouro||'—')+'\n\n── MÉTRICAS ──\nObras: '+d.total_obras+'\nInvestimento: '+d.investimento_total+'\nRetorno local: '+d.retorno_percentual+'%\nDisparidade: '+d.disparidade_label+'\n\n── ANÁLISE ──\n'+d.analise.join('\n\n')+'\n\n── OBRAS ──\n'+d.obras.map(function(o,i){return (i+1)+'. '+o.nome+' ('+o.status+') — '+o.valor+'\n   '+o.detalhe;}).join('\n')+'\n\n── ALERTAS ──\n'+d.alertas.map(function(a){return '• ['+a.tipo.toUpperCase()+'] '+a.titulo+': '+a.descricao;}).join('\n')+'\n\nGerado em: '+new Date().toLocaleString('pt-BR');
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
-  a.download='relatorio-zelador-'+zcDadosCache.cep.replace('-','')+'.txt';
-  a.click();
-}
-
-// ══════════════════════════════════════════════════════════════
-
-document.addEventListener('DOMContentLoaded',function(){
-  zcIniciarMapa();
-});
+    // ENTER PARA ACESSAR
+    document.getElementById('cep-input').addEventListener('keypress', e => {
+        if (e.key === 'Enter') acessar();
+    });
 </script>
+
 </body>
 </html>
