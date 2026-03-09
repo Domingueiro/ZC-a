@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zelador Cívico · Auditoria</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Syne:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #f5f2ec; 
+            --accent: #1a3a5c; 
+            --yellow: #f5c842; 
+            --white: #ffffff;
+            --text: #2c2c2c;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--accent); 
+            font-family: 'Syne', sans-serif; 
+            margin: 0; 
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* MENU DE NAVEGAÇÃO (CHIPS) - ADICIONADO PARA O NOVO ECOSSISTEMA */
+        .nav-container { 
+            display: flex; justify-content: center; gap: 8px; 
+            padding: 15px 10px; background: var(--bg); 
+            position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(26, 58, 92, 0.1);
+        }
+        .chip-nav { 
+            font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+            padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--accent);
+            background: white; color: var(--accent); text-decoration: none;
+            transition: 0.3s; font-weight: 500;
+        }
+        .chip-nav.active { background: var(--accent); color: white; }
+        .chip-nav:hover:not(.active) { background: #eee; }
+
+        /* CONTEÚDO DO ZELADOR */
+        header { padding: 40px 20px; text-align: center; }
+        h1 { font-family: 'DM Serif Display', serif; font-size: 42px; margin: 0; }
+        
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        
+        .card { 
+            background: var(--white); 
+            padding: 30px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(26,58,92,0.1);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .data-label { font-family: 'DM Mono', monospace; font-size: 12px; color: #888; text-transform: uppercase; }
+        .data-value { font-size: 24px; font-weight: 700; margin-bottom: 15px; display: block; }
+
+        .btn-action {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-container">
+        <a href="zelador.html" class="chip-nav active">Zelador Cívico</a>
+        <a href="licitacoes.html" class="chip-nav">Licitações</a>
+        <a href="orcamento.html" class="chip-nav">Orçamento</a>
+    </nav>
+
+    <header>
+        <h1>Zelador Cívico</h1>
+        <p id="local-info" style="font-family: 'DM Mono'; font-size: 14px;">Aguardando dados de localização...</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <span class="data-label">Status da Região</span>
+            <span class="data-value" id="status-region">Analisando dados municipais...</span>
+            <p>Este módulo monitora a manutenção urbana e arrecadação local.</p>
+            <a href="#" class="btn-action">Relatar Ocorrência</a>
+        </div>
+
+        <div class="card">
+            <span class="data-label">Arrecadação Estimada</span>
+            <span class="data-value">R$ --.---.---,--</span>
+            <p>Valores baseados no IPTU e taxas de serviços da região.</p>
+        </div>
+    </div>
+
+    <script>
+        // LÓGICA PARA CAPTURAR PARÂMETROS DA URL (CEP OU GEO)
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cep = urlParams.get('cep');
+            const lat = urlParams.get('lat');
+            const lon = urlParams.get('lon');
+
+            const infoDisplay = document.getElementById('local-info');
+            const statusDisplay = document.getElementById('status-region');
+
+            if (cep) {
+                infoDisplay.innerText = `Localidade: CEP ${cep}`;
+                statusDisplay.innerText = "Dados carregados para São Paulo";
+            } else if (lat && lon) {
+                infoDisplay.innerText = `Coordenadas: ${lat.substring(0,6)}, ${lon.substring(0,6)}`;
+                statusDisplay.innerText = "Localização via GPS ativa";
+            }
+        };
+    </script>
+
+</body>
+</html>
