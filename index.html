@@ -35,7 +35,7 @@
         #sistema-auditoria { display: none; }
         header { background: var(--azul); color: var(--white); padding: 15px; text-align: center; }
         
-        /* ALTERAÇÃO SOLICITADA: ABAS PRETAS COM LETRAS AMARELAS */
+        /* ABAS PRETAS COM LETRAS AMARELAS */
         .tabs { display: flex; background: #000000; border-bottom: 1px solid var(--ouro); position: sticky; top: 0; z-index: 1000; }
         .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-family: 'Syne'; font-weight: 700; color: #ffffff; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: 0.3s; }
         .tab-btn.active { color: var(--ouro); border-bottom: 3px solid var(--ouro); background: #1a1a1a; }
@@ -46,7 +46,6 @@
         #map-container { position: relative; margin-bottom: 15px; }
         #map { height: 380px; border-radius: 10px; border: 1px solid var(--cinza2); z-index: 1; }
         
-        /* ALTERAÇÃO SOLICITADA: CAIXA DE TEXTO NO MAPA */
         .map-legend { 
             position: absolute; top: 10px; right: 10px; z-index: 1000; 
             background: rgba(0,0,0,0.8); color: #fff; padding: 8px 12px; 
@@ -66,10 +65,26 @@
         .radar-icon::after { content: ''; position: absolute; width: 100%; height: 100%; background: var(--vermelho); border-radius: 50%; animation: pulse-radar 1.2s infinite; opacity: 0.5; top: 0; left: 0; }
         @keyframes pulse-radar { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(3.5); opacity: 0; } }
 
-        /* ABA INVESTIMENTO */
+        /* ABA INVESTIMENTO (PILAR ARRECADAÇÃO VS INVESTIMENTO) */
         .invest-box { background: white; padding: 20px; border-radius: 10px; border: 1px solid var(--cinza2); margin-top: 10px; }
-        .barra-prog { width: 100%; background: var(--cinza2); height: 12px; border-radius: 6px; margin: 10px 0 20px; overflow: hidden; }
-        .prog-inner { height: 100%; border-radius: 6px; }
+        .invest-title { font-family: 'Syne'; font-size: 16px; margin-bottom: 20px; border-bottom: 2px solid var(--ouro); display: inline-block; padding-bottom: 5px; }
+        
+        .barra-prog-container { margin-bottom: 25px; }
+        .barra-label { display: flex; justify-content: space-between; font-family: 'DM Mono'; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+        .barra-base { width: 100%; background: var(--cinza2); height: 14px; border-radius: 7px; overflow: hidden; position: relative; }
+        .barra-preenchimento { height: 100%; transition: width 1.5s ease-in-out; }
+        
+        .sweep-effect { 
+            position: absolute; top:0; left:0; right:0; bottom:0; 
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); 
+            animation: sweep 2s infinite; 
+        }
+        @keyframes sweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .card-chave-seguranca { 
+            background: #fffcf0; border: 1px dashed var(--ouro-alaranjado); 
+            padding: 15px; border-radius: 8px; margin-top: 20px; 
+        }
     </style>
 </head>
 <body>
@@ -109,8 +124,30 @@
 
     <div id="tab-investimento" class="tab-content">
         <div class="invest-box">
-            <h3 style="font-family: 'Syne'; font-size: 16px; margin-bottom: 20px;">ARRECADAÇÃO VS. INVESTIMENTO</h3>
-            <p style="font-family: 'DM Mono'; font-size: 14px; color: var(--muted); text-align: center;">Módulo de auditoria financeira em preparação...</p>
+            <h3 class="invest-title">ARRECADAÇÃO VS. INVESTIMENTO</h3>
+            
+            <div class="barra-prog-container">
+                <div class="barra-label"><span>RECEITA MUNICIPAL (VISÍVEL)</span><span>65%</span></div>
+                <div class="barra-base">
+                    <div class="barra-preenchimento" style="width: 65%; background: var(--azul);"></div>
+                </div>
+            </div>
+
+            <div class="barra-prog-container">
+                <div class="barra-label" style="color: var(--emenda-cor);"><span>EMENDAS PARLAMENTARES (INVISÍVEL)</span><span>35%</span></div>
+                <div class="barra-base" style="border: 1px solid var(--emenda-cor);">
+                    <div class="barra-preenchimento" style="width: 35%; background: var(--emenda-cor); position: relative;">
+                        <div class="sweep-effect"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-chave-seguranca">
+                <h4 style="font-family: 'Bebas Neue'; color: var(--accent); letter-spacing: 1px;">🔐 CHAVE-SEGURANÇA: MONITOR DE EMENDAS</h4>
+                <p style="font-size: 13px; color: #555; line-height: 1.4; margin-top: 5px;">
+                    Valores distribuídos sem visualização nos canais tradicionais de transparência. O Zelador está auditando a conversão deste montante em melhorias para o CEP pesquisado.
+                </p>
+            </div>
         </div>
     </div>
 </div>
