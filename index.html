@@ -19,60 +19,42 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: var(--accent); font-family: 'Barlow', sans-serif; min-height: 100vh; }
 
-        /* --- PORTAL DE ENTRADA (AJUSTADO PARA O NOVO LEMA) --- */
+        /* PORTAL DE ENTRADA */
         #portal-entrada { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .portal-card { text-align: center; max-width: 600px; width: 100%; padding: 40px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--cinza2); }
+        .portal-card { text-align: center; max-width: 550px; width: 100%; padding: 40px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--cinza2); }
+        .portal-card h1 { font-family: 'DM Serif Display', serif; font-size: 42px; color: var(--accent); margin-bottom: 10px; }
         
-        .portal-card h1 { font-family: 'DM Serif Display', serif; font-size: 48px; color: var(--accent); margin-bottom: 15px; }
-        
-        /* AJUSTE NO LEMA: Aumentado para caber "Transformando visão em poder" */
+        /* LEMA AMPLIADO E CORRIGIDO */
         .lema-destaque { 
-            background: #000; 
-            color: var(--ouro-alaranjado); 
-            font-family: 'Syne', sans-serif; 
-            font-size: clamp(18px, 4vw, 24px); /* Tamanho adaptável */
-            font-weight: 700; 
-            text-transform: uppercase; 
-            padding: 20px; 
-            border-radius: 12px; 
-            margin: 20px 0 35px; 
-            border: 2px solid var(--ouro-alaranjado);
-            line-height: 1.2;
-            width: 100%;
-            display: block;
+            background: #000; color: var(--ouro-alaranjado); font-family: 'Syne', sans-serif; 
+            font-size: 20px; font-weight: 700; text-transform: uppercase; padding: 20px; 
+            border-radius: 10px; margin: 20px 0 30px; border: 2px solid var(--ouro-alaranjado);
+            display: block; width: 100%; line-height: 1.2;
         }
 
-        .input-group { display: flex; border: 2px solid var(--accent); border-radius: 10px; overflow: hidden; margin-bottom: 15px; background: white; }
-        .input-group input { flex: 1; border: none; padding: 18px; font-family: 'DM Mono'; font-size: 22px; outline: none; width: 100%; }
+        .input-group { display: flex; border: 2px solid var(--accent); border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
+        .input-group input { flex: 1; border: none; padding: 18px; font-family: 'DM Mono'; font-size: 20px; outline: none; }
         .btn-entrar { background: var(--accent); color: white; border: none; padding: 0 25px; cursor: pointer; font-weight: bold; }
-        .btn-geo { width: 100%; padding: 15px; border: 2px solid var(--accent); border-radius: 10px; background: white; font-family: 'Syne'; font-weight: 700; cursor: pointer; text-transform: uppercase; }
 
-        /* --- RESTANTE DO SISTEMA --- */
+        /* SISTEMA */
         #sistema-auditoria { display: none; }
         header { background: var(--azul); color: var(--white); padding: 15px; text-align: center; }
         
         .tabs { display: flex; background: #000000; border-bottom: 1px solid var(--ouro); position: sticky; top: 0; z-index: 1000; }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-family: 'Syne'; font-weight: 700; color: #ffffff; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: 0.3s; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-family: 'Syne'; font-weight: 700; color: #ffffff; cursor: pointer; text-transform: uppercase; font-size: 11px; }
         .tab-btn.active { color: var(--ouro); border-bottom: 3px solid var(--ouro); background: #1a1a1a; }
         
         .tab-content { display: none; padding: 15px; }
         .tab-content.active { display: block; }
 
-        #map-container { position: relative; margin-bottom: 15px; }
-        #map { height: 380px; border-radius: 10px; border: 1px solid var(--cinza2); z-index: 1; }
-        
-        .map-legend { 
-            position: absolute; top: 10px; right: 10px; z-index: 1000; 
-            background: rgba(0,0,0,0.8); color: #fff; padding: 8px 12px; 
-            border-radius: 5px; font-size: 11px; max-width: 150px; 
-            border: 1px solid var(--ouro); pointer-events: none;
-            font-family: 'DM Mono', monospace;
-        }
+        #map { height: 400px; border-radius: 10px; border: 1px solid var(--cinza2); margin-bottom: 15px; }
 
         /* RADAR ICON */
         .radar-icon { width: 18px; height: 18px; background: var(--vermelho); border-radius: 50%; border: 2px solid white; position: relative; }
         .radar-icon::after { content: ''; position: absolute; width: 100%; height: 100%; background: var(--vermelho); border-radius: 50%; animation: pulse-radar 1.2s infinite; opacity: 0.5; top: 0; left: 0; }
         @keyframes pulse-radar { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(3.5); opacity: 0; } }
+
+        .card-invest { background: white; padding: 20px; border-radius: 10px; border: 1px solid var(--cinza2); margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
@@ -81,12 +63,10 @@
     <div class="portal-card">
         <h1>Zelador Cívico</h1>
         <div class="lema-destaque">Transformando visão em poder</div>
-        
         <div class="input-group">
-            <input type="text" id="cep-input" placeholder="00000-000" maxlength="9" inputmode="numeric">
+            <input type="text" id="cep-input" placeholder="00000-000" maxlength="9">
             <button class="btn-entrar" onclick="acessarComCep()">OK</button>
         </div>
-        <button class="btn-geo" onclick="acessarComGeo()">📍 USAR LOCALIZAÇÃO</button>
     </div>
 </div>
 
@@ -95,22 +75,80 @@
     
     <div class="tabs">
         <button class="tab-btn active" onclick="mudarAba('radar', this)">RADAR</button>
-        <button class="tab-btn" onclick="mudarAba('alertas', this)">ALERTAS</button>
         <button class="tab-btn" onclick="mudarAba('investimento', this)">INVESTIMENTO</button>
     </div>
 
+    <div id="tab-radar" class="tab-content active">
+        <div id="map"></div>
     </div>
 
+    <div id="tab-investimento" class="tab-content">
+        <div class="card-invest">
+            <h3 style="font-family: 'Syne'; margin-bottom: 10px;">MÓDULO DE INVESTIMENTOS</h3>
+            <p style="font-family: 'DM Mono'; font-size: 14px; color: var(--muted);">Aguardando dados de emendas...</p>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Lógica de CEP e inicialização mantida...
-    function acessarComCep() {
-        const val = document.getElementById('cep-input').value.replace(/\D/g, '');
-        if(val.length === 8) {
-            document.getElementById('portal-entrada').style.display = 'none';
-            document.getElementById('sistema-auditoria').style.display = 'block';
-            // Restante da inicialização...
+    var mapa = null;
+    var markersLayer = L.layerGroup();
+
+    function mudarAba(id, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + id).classList.add('active');
+        if(id === 'radar' && mapa) {
+            setTimeout(() => { mapa.invalidateSize(); }, 200);
         }
     }
+
+    function acessarComCep() {
+        const cep = document.getElementById('cep-input').value.replace(/\D/g, '');
+        if(cep.length === 8) {
+            document.getElementById('portal-entrada').style.display = 'none';
+            document.getElementById('sistema-auditoria').style.display = 'block';
+            initMapa(cep);
+        } else {
+            alert("CEP Inválido");
+        }
+    }
+
+    function initMapa(cep) {
+        if (!mapa) {
+            mapa = L.map('map').setView([-23.55, -46.63], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
+            markersLayer.addTo(mapa);
+        }
+
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+            .then(r => r.json())
+            .then(d => {
+                const endereco = (d.logradouro || d.bairro) + ", São Paulo";
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}`)
+                    .then(r => r.json())
+                    .then(g => {
+                        if(g[0]) {
+                            const lat = parseFloat(g[0].lat);
+                            const lon = parseFloat(g[0].lon);
+                            mapa.setView([lat, lon], 16);
+                            L.marker([lat, lon]).addTo(mapa).bindPopup("Você está aqui").openPopup();
+                            
+                            // Adiciona um ponto de radar simulado
+                            const icon = L.divIcon({ className: '', html: '<div class="radar-icon"></div>', iconSize: [18, 18] });
+                            L.marker([lat + 0.002, lon + 0.002], { icon: icon }).addTo(markersLayer);
+                        }
+                    });
+            });
+    }
+
+    // Máscara CEP
+    document.getElementById('cep-input').addEventListener('input', (e) => {
+        let v = e.target.value.replace(/\D/g, '');
+        if (v.length > 5) v = v.substring(0, 5) + '-' + v.substring(5, 8);
+        e.target.value = v;
+    });
 </script>
 </body>
 </html>
